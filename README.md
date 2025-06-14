@@ -1,30 +1,62 @@
-# Telemetry dashboard design
+# Dashboard Plant Monitor
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+Um dashboard moderno para monitoramento de plantas industriais, construído com Next.js, Tailwind CSS e Recharts.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/devandreheidemann-gmailcoms-projects/v0-telemetry-dashboard-design)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/OZRdl3cLOaf)
+## 🚀 Tecnologias
 
-## Overview
+- Next.js 15
+- React 19
+- Tailwind CSS
+- Recharts
+- TypeScript
+- pnpm
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+## 📋 Pré-requisitos
 
-## Deployment
+- Node.js (versão 18 ou superior)
+- pnpm (gerenciador de pacotes)
 
-Your project is live at:
+## 🔧 Instalação
 
-**[https://vercel.com/devandreheidemann-gmailcoms-projects/v0-telemetry-dashboard-design](https://vercel.com/devandreheidemann-gmailcoms-projects/v0-telemetry-dashboard-design)**
+1. Clone o repositório:
+```bash
+git clone [URL_DO_REPOSITÓRIO]
+cd Dashboard-Vercel
+```
 
-## Build your app
+2. Instale as dependências:
+```bash
+pnpm install
+```
 
-Continue building your app on:
+3. Execute o projeto em modo de desenvolvimento:
+```bash
+pnpm dev
+```
 
-**[https://v0.dev/chat/projects/OZRdl3cLOaf](https://v0.dev/chat/projects/OZRdl3cLOaf)**
+4. Abra [http://localhost:3000](http://localhost:3000) no seu navegador para ver o resultado.
 
-## How It Works
+## 🛠️ Scripts Disponíveis
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+- `pnpm dev` - Inicia o servidor de desenvolvimento
+- `pnpm build` - Cria a versão de produção
+- `pnpm start` - Inicia o servidor de produção
+- `pnpm lint` - Executa a verificação de linting
+
+## 📊 Funcionalidades
+
+- Monitoramento em tempo real de equipamentos industriais
+- Visualização de dados através de gráficos interativos
+- Filtros por área de produção
+- Interface responsiva e moderna
+- Suporte a temas claro/escuro
+
+## 🎨 Personalização
+
+O projeto utiliza Tailwind CSS para estilização. As configurações podem ser encontradas em:
+- `tailwind.config.ts`
+- `app/globals.css`
+
+## 📝 Licença
+
+Este projeto está sob a licença MIT.
