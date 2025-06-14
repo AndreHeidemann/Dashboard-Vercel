@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Factory, Power, CheckCircle, Clock, Filter } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 // Mock data structure
 const mockData = {
@@ -165,12 +166,15 @@ export default function TelemetryDashboard() {
     <SidebarProvider>
       <Sidebar className="w-64">
         <SidebarHeader className="p-4">
-          <div className="flex items-center gap-2">
-            <Factory className="h-6 w-6 text-blue-600" />
-            <div>
-              <h2 className="font-semibold text-lg">Plant Monitor</h2>
-              <p className="text-sm text-muted-foreground">Telemetry Dashboard</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Factory className="h-6 w-6 text-blue-600" />
+              <div>
+                <h2 className="font-semibold text-lg">Plant Monitor</h2>
+                <p className="text-sm text-muted-foreground">Telemetry Dashboard</p>
+              </div>
             </div>
+            <ThemeToggle />
           </div>
         </SidebarHeader>
 
