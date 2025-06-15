@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Factory, Power, CheckCircle, Clock, Filter, Loader2 } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useTelemetry } from "@/hooks/useTelemetry"
 import { useTheme } from "next-themes"
 
@@ -30,8 +30,30 @@ const getStatusColor = (isActive: boolean) => {
   return isActive ? "text-green-500" : "text-gray-400"
 }
 
+const getPercentageColor = (active: number, total: number) => {
+  const percentage = (active / total) * 100
+  if (percentage >= 75) return "bg-green-500 hover:bg-green-600"
+  if (percentage >= 50) return "bg-orange-500 hover:bg-orange-600"
+  return "bg-destructive hover:bg-destructive/90"
+}
+
 const getStatusIcon = (isActive: boolean) => {
   return isActive ? CheckCircle : Power
+}
+
+const calculateActiveEquipment = (data: any) => {
+  let totalEquipment = 0;
+  let activeEquipment = 0;
+
+  Object.values(data).forEach((area: any) => {
+    Object.values(area.equipment).forEach((equip: any) => {
+      totalEquipment++;
+      // TODO: Verificar se o equipamento está ativo
+      activeEquipment++;
+    });
+  });
+
+  return { totalEquipment, activeEquipment };
 }
 
 const chartColors = {
@@ -72,12 +94,22 @@ function formatDateTime(timestamp: string): string {
 export default function TelemetryDashboard() {
   const [selectedIndex, setSelectedIndex] = useState<string>("all")
   const [timeRange, setTimeRange] = useState<string>("24h")
+  const [isChangingArea, setIsChangingArea] = useState(false)
   const { data, isLoading, error } = useTelemetry(timeRange)
   const { theme } = useTheme()
 
-  if (isLoading) {
+  const handleAreaChange = (newIndex: string) => {
+    setIsChangingArea(true)
+    setSelectedIndex(newIndex)
+    // Simular um pequeno delay para mostrar o loading
+    setTimeout(() => {
+      setIsChangingArea(false)
+    }, 500)
+  }
+
+  if (isLoading || isChangingArea) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen opacity-50 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     )
@@ -93,6 +125,7 @@ export default function TelemetryDashboard() {
 
   const telemetryData = data.data;
   const lastUpdate = data.lastUpdate;
+  const { totalEquipment, activeEquipment } = calculateActiveEquipment(telemetryData);
 
   const filteredData =
     selectedIndex === "all" ? telemetryData : { [selectedIndex]: telemetryData[selectedIndex] }
@@ -122,13 +155,13 @@ export default function TelemetryDashboard() {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton onClick={() => setSelectedIndex("all")} isActive={selectedIndex === "all"}>
+                  <SidebarMenuButton onClick={() => handleAreaChange("all")} isActive={selectedIndex === "all"}>
                     All Areas
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 {Object.entries(telemetryData).map(([key, area]) => (
                   <SidebarMenuItem key={key}>
-                    <SidebarMenuButton onClick={() => setSelectedIndex(key)} isActive={selectedIndex === key}>
+                    <SidebarMenuButton onClick={() => handleAreaChange(key)} isActive={selectedIndex === key}>
                       <span className="font-mono text-xs bg-muted px-1 rounded">{key}</span>
                       {area.name}
                     </SidebarMenuButton>
@@ -143,12 +176,10 @@ export default function TelemetryDashboard() {
             <SidebarGroupContent className="space-y-2 p-2">
               <div className="flex items-center justify-between text-sm">
                 <span>Active Equipment</span>
-                <Badge variant="secondary">12/15</Badge>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span>Alerts</span>
-                <Badge variant="destructive">2</Badge>
-              </div>
+                <Badge variant="secondary" className={getPercentageColor(activeEquipment, totalEquipment)}>
+                  {activeEquipment}/{totalEquipment} ({Math.round((activeEquipment/totalEquipment) * 100)}%)
+                </Badge>
+              </div>              
               <div className="flex items-center justify-between text-sm">
                 <span>Last Update</span>
                 <span className="text-muted-foreground">
@@ -197,7 +228,12 @@ export default function TelemetryDashboard() {
 
         <main className="flex-1 space-y-6 p-6">
           {Object.entries(filteredData).map(([indexKey, indexData]) => (
-            <div key={indexKey} className="space-y-4">
+            <div 
+              key={indexKey} 
+              className={`space-y-4 transition-all duration-300 ease-in-out ${
+                isChangingArea ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <Badge variant="outline" className="font-mono">
                   {indexKey}
@@ -205,14 +241,21 @@ export default function TelemetryDashboard() {
                 <h2 className="text-2xl font-bold">{indexData.name}</h2>
                 <div className="flex items-center gap-2 ml-auto">
                   <span className="text-sm text-muted-foreground">
-                    {Object.keys(indexData.equipment).length} Equipment Units
+                    {selectedIndex === "all" 
+                      ? `${totalEquipment} Equipment Units` 
+                      : `${Object.keys(indexData.equipment).length} Equipment Units`}
                   </span>
                 </div>
               </div>
 
               <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
                 {Object.entries(indexData.equipment).map(([equipKey, equipment]) => (
-                  <Card key={equipKey} className="overflow-hidden">
+                  <Card 
+                    key={equipKey} 
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      isChangingArea ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
+                    }`}
+                  >
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg">{equipment.name}</CardTitle>
