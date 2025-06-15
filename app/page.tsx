@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -92,11 +92,18 @@ function formatDateTime(timestamp: string): string {
 }
 
 export default function TelemetryDashboard() {
-  const [selectedIndex, setSelectedIndex] = useState<string>("all")
+  const [selectedIndex, setSelectedIndex] = useState<string>("")
   const [timeRange, setTimeRange] = useState<string>("12h")
   const [isChangingArea, setIsChangingArea] = useState(false)
   const { data, isLoading, error } = useTelemetry(timeRange)
   const { theme } = useTheme()
+
+  // Efeito para definir o índice inicial quando os dados forem carregados
+  useEffect(() => {
+    if (data?.data && Object.keys(data.data).length > 0) {
+      setSelectedIndex(Object.keys(data.data)[0])
+    }
+  }, [data])
 
   const handleAreaChange = (newIndex: string) => {
     setIsChangingArea(true)
@@ -127,8 +134,7 @@ export default function TelemetryDashboard() {
   const lastUpdate = data.lastUpdate;
   const { totalEquipment, activeEquipment } = calculateActiveEquipment(telemetryData);
 
-  const filteredData =
-    selectedIndex === "all" ? telemetryData : { [selectedIndex]: telemetryData[selectedIndex] }
+  const filteredData = telemetryData[selectedIndex] ? { [selectedIndex]: telemetryData[selectedIndex] } : {}
 
   return (
     <SidebarProvider>
@@ -154,11 +160,6 @@ export default function TelemetryDashboard() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton onClick={() => handleAreaChange("all")} isActive={selectedIndex === "all"}>
-                    All Areas
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
                 {Object.entries(telemetryData).map(([key, area]) => (
                   <SidebarMenuItem key={key}>
                     <SidebarMenuButton onClick={() => handleAreaChange(key)} isActive={selectedIndex === key}>
@@ -241,9 +242,7 @@ export default function TelemetryDashboard() {
                 <h2 className="text-2xl font-bold">{indexData?.name || 'Sem nome'}</h2>
                 <div className="flex items-center gap-2 ml-auto">
                   <span className="text-sm text-muted-foreground">
-                    {selectedIndex === "all" 
-                      ? `${totalEquipment} Equipment Units` 
-                      : `${Object.keys(indexData?.equipment || {}).length} Equipment Units`}
+                    {`${Object.keys(indexData?.equipment || {}).length} Equipment Units`}
                   </span>
                 </div>
               </div>
