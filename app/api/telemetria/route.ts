@@ -51,14 +51,16 @@ let csvCache: {
 
 // Função para ler o CSV com cache
 async function readCSVWithCache(): Promise<CSVRow[]> {
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos em milissegundos
+  const CACHE_DURATION = 5 * 60 * 1000; // 10 minutos em milissegundos
   const now = Date.now();
 
   // Se o cache existe e não expirou, retorna os dados do cache
   if (csvCache && (now - csvCache.lastRead) < CACHE_DURATION) {
+    console.log('Retornando dados do cache');
     return csvCache.data;
   }
 
+  console.log('Cache expirado ou não existe, lendo arquivo CSV');
   const filePath = path.join(process.cwd(), 'data', 'telemetria.csv');
 
   // Verifica se o arquivo existe
@@ -66,17 +68,25 @@ async function readCSVWithCache(): Promise<CSVRow[]> {
     throw new Error('Arquivo de telemetria não encontrado');
   }
 
-  // Lê o arquivo CSV
+  // Lê o arquivo CSV com streaming para melhor performance
   const data = await new Promise<CSVRow[]>((resolve, reject) => {
     const results: CSVRow[] = [];
-    fs.createReadStream(filePath)
+    const stream = fs.createReadStream(filePath, { highWaterMark: 64 * 1024 }); // 64KB chunks
+
+    stream
       .pipe(csv({
         mapHeaders: ({ header }) => header.trim(),
         mapValues: ({ value }) => value.trim()
       }))
       .on('data', (row: CSVRow) => results.push(row))
-      .on('end', () => resolve(results))
-      .on('error', (error: Error) => reject(error));
+      .on('end', () => {
+        console.log(`CSV lido com sucesso: ${results.length} registros`);
+        resolve(results);
+      })
+      .on('error', (error: Error) => {
+        console.error('Erro ao ler CSV:', error);
+        reject(error);
+      });
   });
 
   // Atualiza o cache
@@ -88,6 +98,25 @@ async function readCSVWithCache(): Promise<CSVRow[]> {
   return data;
 }
 
+// Função para normalizar o formato do timestamp
+function normalizeTimestamp(timestamp: string): Date {
+  // Converte o formato yyyy-mm-dd hh:mm:ss para um objeto Date
+  const [datePart, timePart] = timestamp.split(' ');
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hours, minutes, seconds] = timePart.split(':').map(Number);
+  
+  // Cria uma nova data com os componentes extraídos
+  // Note: month - 1 porque em JavaScript os meses começam em 0
+  const date = new Date(year, month - 1, day, hours, minutes, seconds);
+  
+  if (isNaN(date.getTime())) {
+    console.error('Timestamp inválido:', timestamp);
+    throw new Error('Formato de timestamp inválido');
+  }
+  
+  return date;
+}
+
 // Função para filtrar dados por período
 function filterDataByTimeRange(data: CSVRow[], timeRange: string): CSVRow[] {
   const now = new Date();
@@ -97,7 +126,7 @@ function filterDataByTimeRange(data: CSVRow[], timeRange: string): CSVRow[] {
   const match = timeRange.match(/^(\d+)([hdm])$/);
   
   if (!match) {
-    // Se o formato não for válido, usa 24h como padrão
+    console.log('Formato de tempo inválido, usando padrão 24h');
     startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   } else {
     const [, value, unit] = match;
@@ -113,16 +142,29 @@ function filterDataByTimeRange(data: CSVRow[], timeRange: string): CSVRow[] {
     startTime = new Date(now.getTime() - milliseconds);
   }
 
-  return data.filter(row => {
-    const rowDate = new Date(row.timestamp);
-    return rowDate >= startTime && rowDate <= now;
+  // Filtra os dados usando um único loop para melhor performance
+  const filteredData = data.filter(row => {
+    try {
+      const rowDate = normalizeTimestamp(row.timestamp);
+      return rowDate >= startTime && rowDate <= now;
+    } catch (error) {
+      console.error('Erro ao processar timestamp:', row.timestamp);
+      return false;
+    }
+  });
+
+  // Ordena os dados filtrados
+  return filteredData.sort((a, b) => {
+    const dateA = normalizeTimestamp(a.timestamp);
+    const dateB = normalizeTimestamp(b.timestamp);
+    return dateA.getTime() - dateB.getTime();
   });
 }
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const timeRange = searchParams.get('timeRange') || '24h';
+    const timeRange = searchParams.get('timeRange') || '12h';
 
     // Lê os dados do CSV (com cache)
     const data = await readCSVWithCache();
@@ -131,6 +173,12 @@ export async function GET(request: Request) {
     const filteredData = filterDataByTimeRange(data, timeRange);
 
     const telemetryData: TelemetryData = {};
+
+    // Se não houver dados filtrados, retorna um objeto vazio
+    if (filteredData.length === 0) {
+      console.log('Nenhum dado encontrado para o período:', timeRange);
+      return NextResponse.json(telemetryData);
+    }
 
     // Agrupa os dados por índice, equipamento e medição
     const groupedData: { [key: string]: { [key: string]: { [key: string]: TimeSeriesData[] } } } = {};
@@ -142,21 +190,27 @@ export async function GET(request: Request) {
       const measurementValue = parseFloat(row.measurement_value);
       const timestamp = row.timestamp;
 
-      if (!groupedData[index]) {
-        groupedData[index] = {};
-      }
-      if (!groupedData[index][recurso]) {
-        groupedData[index][recurso] = {};
-      }
-      if (!groupedData[index][recurso][measurementName]) {
-        groupedData[index][recurso][measurementName] = [];
-      }
+      try {
+        const normalizedDate = normalizeTimestamp(timestamp);
+        
+        if (!groupedData[index]) {
+          groupedData[index] = {};
+        }
+        if (!groupedData[index][recurso]) {
+          groupedData[index][recurso] = {};
+        }
+        if (!groupedData[index][recurso][measurementName]) {
+          groupedData[index][recurso][measurementName] = [];
+        }
 
-      groupedData[index][recurso][measurementName].push({
-        timestamp: timestamp,
-        time: timestamp.split(' ')[1],
-        value: measurementValue
-      });
+        groupedData[index][recurso][measurementName].push({
+          timestamp: normalizedDate.toISOString(),
+          time: normalizedDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          value: measurementValue
+        });
+      } catch (error) {
+        console.error('Erro ao processar timestamp no agrupamento:', timestamp);
+      }
     });
 
     // Processa os dados agrupados

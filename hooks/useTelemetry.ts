@@ -51,6 +51,6 @@ export function useTelemetry(timeRange: string = '24h') {
   return useQuery<TelemetryResponse>({
     queryKey: ['telemetry', timeRange],
     queryFn: () => fetchTelemetryData(timeRange),
-    refetchInterval: 30000, // Atualiza a cada 30 segundos
+    refetchInterval: 120000, // Atualiza a cada 2 minutos
   });
 } 

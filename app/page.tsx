@@ -93,7 +93,7 @@ function formatDateTime(timestamp: string): string {
 
 export default function TelemetryDashboard() {
   const [selectedIndex, setSelectedIndex] = useState<string>("all")
-  const [timeRange, setTimeRange] = useState<string>("24h")
+  const [timeRange, setTimeRange] = useState<string>("12h")
   const [isChangingArea, setIsChangingArea] = useState(false)
   const { data, isLoading, error } = useTelemetry(timeRange)
   const { theme } = useTheme()
@@ -238,18 +238,18 @@ export default function TelemetryDashboard() {
                 <Badge variant="outline" className="font-mono">
                   {indexKey}
                 </Badge>
-                <h2 className="text-2xl font-bold">{indexData.name}</h2>
+                <h2 className="text-2xl font-bold">{indexData?.name || 'Sem nome'}</h2>
                 <div className="flex items-center gap-2 ml-auto">
                   <span className="text-sm text-muted-foreground">
                     {selectedIndex === "all" 
                       ? `${totalEquipment} Equipment Units` 
-                      : `${Object.keys(indexData.equipment).length} Equipment Units`}
+                      : `${Object.keys(indexData?.equipment || {}).length} Equipment Units`}
                   </span>
                 </div>
               </div>
 
               <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
-                {Object.entries(indexData.equipment).map(([equipKey, equipment]) => (
+                {Object.entries(indexData?.equipment || {}).map(([equipKey, equipment]) => (
                   <Card 
                     key={equipKey} 
                     className={`overflow-hidden transition-all duration-300 ease-in-out ${
@@ -299,12 +299,35 @@ export default function TelemetryDashboard() {
                                 <LineChart data={measurement.data}>
                                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                                   <XAxis 
-                                    dataKey="time" 
+                                    dataKey="timestamp" 
                                     tick={{ 
                                       fontSize: 10,
                                       fill: theme === 'dark' ? '#fff' : '#000'
                                     }} 
-                                    interval="preserveStartEnd" 
+                                    interval="preserveStartEnd"
+                                    tickFormatter={(value) => {
+                                      const date = new Date(value);
+                                      // Mostra apenas a hora se for o mesmo dia
+                                      const today = new Date();
+                                      const isToday = date.toDateString() === today.toDateString();
+                                      
+                                      if (isToday) {
+                                        return date.toLocaleTimeString('pt-BR', { 
+                                          hour: '2-digit', 
+                                          minute: '2-digit',
+                                          hour12: false 
+                                        });
+                                      }
+                                      
+                                      // Se não for hoje, mostra a data completa
+                                      return date.toLocaleDateString('pt-BR', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: false
+                                      });
+                                    }}
                                   />
                                   <YAxis 
                                     tick={{ 
@@ -312,23 +335,45 @@ export default function TelemetryDashboard() {
                                       fill: theme === 'dark' ? '#fff' : '#000'
                                     }} 
                                     domain={measurement.unit === "bool" ? [0, 1] : ["dataMin - 5", "dataMax + 5"]}
-                                    tickFormatter={measurement.unit === "bool" ? (value) => value === 1 ? "ON" : "OFF" : undefined}
+                                    tickFormatter={(value) => {
+                                      // Formata o valor com 2 casas decimais
+                                      return measurement.unit === "bool" 
+                                        ? (value === 1 ? "ON" : "OFF")
+                                        : value.toFixed(2);
+                                    }}
                                   />
                                   <Tooltip
-                                    labelFormatter={(label) => (
-                                      <span style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
-                                        Time: {label}
-                                      </span>
-                                    )}
+                                    labelFormatter={(label) => {
+                                      const date = new Date(label);
+                                      return (
+                                        <span style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
+                                          {date.toLocaleDateString('pt-BR', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                          })} {date.toLocaleTimeString('pt-BR', { 
+                                            hour: '2-digit', 
+                                            minute: '2-digit',
+                                            hour12: false 
+                                          })}
+                                        </span>
+                                      );
+                                    }}
                                     formatter={(value: any) => [
                                       measurement.unit === "bool" 
                                         ? (value === 1 ? "ON" : "OFF")
-                                        : `${value} ${measurement.unit}`,
+                                        : `${value.toFixed(2)} ${measurement.unit}`,
                                       measurementKey.replace(/_/g, " "),
                                     ]}
                                     contentStyle={{
                                       backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
-                                      border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`
+                                      border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+                                      padding: '4px 8px',
+                                      fontSize: '12px',
+                                      borderRadius: '4px'
+                                    }}
+                                    wrapperStyle={{
+                                      outline: 'none'
                                     }}
                                   />
                                   <Line
@@ -338,6 +383,7 @@ export default function TelemetryDashboard() {
                                     strokeWidth={2}
                                     dot={false}
                                     activeDot={{ r: 4 }}
+                                    animationDuration={300}
                                   />
                                 </LineChart>
                               </ResponsiveContainer>
