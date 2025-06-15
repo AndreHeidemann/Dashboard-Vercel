@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -20,109 +20,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Factory, Power, CheckCircle, Clock, Filter } from "lucide-react"
+import { Factory, Power, CheckCircle, Clock, Filter, Loader2 } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { ThemeToggle } from "@/components/theme-toggle"
-
-// Mock data structure
-const mockData = {
-  CEM: {
-    name: "Coverage",
-    equipment: {
-      Reactor_1: {
-        name: "Reactor 1",
-        measurements: {
-          temperature: { value: 85.2, unit: "°C", data: generateTimeSeriesData(85, 5) },
-          pressure: { value: 2.4, unit: "Bar", data: generateTimeSeriesData(2.4, 0.3) },
-          agitator_speed: { value: 120, unit: "RPM", data: generateTimeSeriesData(120, 10) },
-          agitator_status: { value: true, unit: "boolean" },
-          motor_current: { value: 15.8, unit: "A", data: generateTimeSeriesData(15.8, 2) },
-        },
-      },
-      Mixer_1: {
-        name: "Mixer 1",
-        measurements: {
-          temperature: { value: 65.5, unit: "°C", data: generateTimeSeriesData(65.5, 3) },
-          motor_frequency: { value: 45, unit: "Hz", data: generateTimeSeriesData(45, 5) },
-          power_consumption: { value: 12.3, unit: "kW", data: generateTimeSeriesData(12.3, 1.5) },
-          mixer_status: { value: true, unit: "boolean" },
-        },
-      },
-    },
-  },
-  PSV: {
-    name: "Pastes & Masses",
-    equipment: {
-      Misturador_1: {
-        name: "Misturador 1",
-        measurements: {
-          frequencia_bomba: { value: 35, unit: "Hz", data: generateTimeSeriesData(35, 3) },
-          frequencia_misturador: { value: 28, unit: "Hz", data: generateTimeSeriesData(28, 2) },
-          peso_misturador: { value: 450, unit: "Kg", data: generateTimeSeriesData(450, 25) },
-          temperatura: { value: 72, unit: "°C", data: generateTimeSeriesData(72, 4) },
-          setpoint_temperatura: { value: 75, unit: "°C", data: generateTimeSeriesData(75, 1) },
-          status_agitador: { value: true, unit: "boolean" },
-        },
-      },
-      Tank_Storage_1: {
-        name: "Tank Storage 1",
-        measurements: {
-          level: { value: 78, unit: "%", data: generateTimeSeriesData(78, 8) },
-          temperature: { value: 25, unit: "°C", data: generateTimeSeriesData(25, 2) },
-          pump_status: { value: false, unit: "boolean" },
-          flow_rate: { value: 125, unit: "L/min", data: generateTimeSeriesData(125, 15) },
-        },
-      },
-    },
-  },
-  SPR: {
-    name: "Spray",
-    equipment: {
-      Spray_Dryer_1: {
-        name: "Spray Dryer 1",
-        measurements: {
-          inlet_temperature: { value: 180, unit: "°C", data: generateTimeSeriesData(180, 10) },
-          outlet_temperature: { value: 85, unit: "°C", data: generateTimeSeriesData(85, 5) },
-          atomizer_speed: { value: 15000, unit: "RPM", data: generateTimeSeriesData(15000, 500) },
-          feed_rate: { value: 50, unit: "kg/h", data: generateTimeSeriesData(50, 5) },
-          dryer_status: { value: true, unit: "boolean" },
-        },
-      },
-    },
-  },
-  DET: {
-    name: "Distillery",
-    equipment: {
-      Distillation_Column_1: {
-        name: "Distillation Column 1",
-        measurements: {
-          top_temperature: { value: 78, unit: "°C", data: generateTimeSeriesData(78, 3) },
-          bottom_temperature: { value: 95, unit: "°C", data: generateTimeSeriesData(95, 4) },
-          reflux_ratio: { value: 3.2, unit: "ratio", data: generateTimeSeriesData(3.2, 0.2) },
-          column_pressure: { value: 1.2, unit: "Bar", data: generateTimeSeriesData(1.2, 0.1) },
-          reboiler_status: { value: true, unit: "boolean" },
-        },
-      },
-    },
-  },
-}
-
-function generateTimeSeriesData(baseValue: number, variance: number) {
-  const data = []
-  const now = new Date()
-
-  for (let i = 287; i >= 0; i--) {
-    const timestamp = new Date(now.getTime() - i * 5 * 60 * 1000)
-    const value = baseValue + (Math.random() - 0.5) * variance * 2
-    data.push({
-      timestamp: timestamp.toISOString(),
-      time: timestamp.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-      value: Number(value.toFixed(2)),
-    })
-  }
-
-  return data
-}
+import { useTelemetry } from "@/hooks/useTelemetry"
+import { useTheme } from "next-themes"
 
 const getStatusColor = (isActive: boolean) => {
   return isActive ? "text-green-500" : "text-gray-400"
@@ -155,12 +57,45 @@ function getChartColor(measurementKey: string) {
   return "#6b7280"
 }
 
+function formatDateTime(timestamp: string): string {
+  const date = new Date(timestamp);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+}
+
 export default function TelemetryDashboard() {
   const [selectedIndex, setSelectedIndex] = useState<string>("all")
   const [timeRange, setTimeRange] = useState<string>("24h")
+  const { data, isLoading, error } = useTelemetry(timeRange)
+  const { theme } = useTheme()
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-red-600">Erro ao carregar dados de telemetria</div>
+      </div>
+    )
+  }
+
+  const telemetryData = data.data;
+  const lastUpdate = data.lastUpdate;
 
   const filteredData =
-    selectedIndex === "all" ? mockData : { [selectedIndex]: mockData[selectedIndex as keyof typeof mockData] }
+    selectedIndex === "all" ? telemetryData : { [selectedIndex]: telemetryData[selectedIndex] }
 
   return (
     <SidebarProvider>
@@ -191,7 +126,7 @@ export default function TelemetryDashboard() {
                     All Areas
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                {Object.entries(mockData).map(([key, area]) => (
+                {Object.entries(telemetryData).map(([key, area]) => (
                   <SidebarMenuItem key={key}>
                     <SidebarMenuButton onClick={() => setSelectedIndex(key)} isActive={selectedIndex === key}>
                       <span className="font-mono text-xs bg-muted px-1 rounded">{key}</span>
@@ -216,7 +151,9 @@ export default function TelemetryDashboard() {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span>Last Update</span>
-                <span className="text-muted-foreground">2 min ago</span>
+                <span className="text-muted-foreground">
+                  {formatDateTime(lastUpdate)}
+                </span>
               </div>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -241,8 +178,12 @@ export default function TelemetryDashboard() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="30m">Last 30 Minutes</SelectItem>
                   <SelectItem value="1h">Last Hour</SelectItem>
-                  <SelectItem value="24h">Last 24h</SelectItem>
+                  <SelectItem value="6h">Last 6 Hours</SelectItem>
+                  <SelectItem value="12h">Last 12 Hours</SelectItem>
+                  <SelectItem value="24h">Last 24 Hours</SelectItem>
+                  <SelectItem value="2d">Last 2 Days</SelectItem>
                   <SelectItem value="7d">Last 7 Days</SelectItem>
                 </SelectContent>
               </Select>
@@ -276,13 +217,13 @@ export default function TelemetryDashboard() {
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg">{equipment.name}</CardTitle>
                         <div className="flex items-center gap-2">
-                          {Object.entries(equipment.measurements)
+                          {Object.entries(equipment.measurement)
                             .filter(([_, measurement]) => measurement.unit === "boolean")
                             .map(([key, measurement]) => {
-                              const StatusIcon = getStatusIcon(measurement.value as boolean)
+                              const StatusIcon = getStatusIcon(Boolean(measurement.value))
                               return (
                                 <div key={key} className="flex items-center gap-1">
-                                  <StatusIcon className={`h-4 w-4 ${getStatusColor(measurement.value as boolean)}`} />
+                                  <StatusIcon className={`h-4 w-4 ${getStatusColor(Boolean(measurement.value))}`} />
                                   <span className="text-xs text-muted-foreground capitalize">
                                     {key.replace(/_/g, " ")}
                                   </span>
@@ -294,7 +235,7 @@ export default function TelemetryDashboard() {
                     </CardHeader>
 
                     <CardContent className="space-y-6">
-                      {Object.entries(equipment.measurements)
+                      {Object.entries(equipment.measurement)
                         .filter(([_, measurement]) => measurement.unit !== "boolean")
                         .map(([measurementKey, measurement]) => (
                           <div key={measurementKey} className="space-y-2">
@@ -302,7 +243,7 @@ export default function TelemetryDashboard() {
                               <h4 className="text-sm font-medium capitalize">{measurementKey.replace(/_/g, " ")}</h4>
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-mono">
-                                  {measurement.value} {measurement.unit}
+                                  {measurement.value}
                                 </span>
                                 <Badge variant="secondary" className="text-xs">
                                   {measurement.unit}
@@ -314,14 +255,38 @@ export default function TelemetryDashboard() {
                               <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={measurement.data}>
                                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                                  <XAxis dataKey="time" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
-                                  <YAxis tick={{ fontSize: 10 }} domain={["dataMin - 5", "dataMax + 5"]} />
+                                  <XAxis 
+                                    dataKey="time" 
+                                    tick={{ 
+                                      fontSize: 10,
+                                      fill: theme === 'dark' ? '#fff' : '#000'
+                                    }} 
+                                    interval="preserveStartEnd" 
+                                  />
+                                  <YAxis 
+                                    tick={{ 
+                                      fontSize: 10,
+                                      fill: theme === 'dark' ? '#fff' : '#000'
+                                    }} 
+                                    domain={measurement.unit === "bool" ? [0, 1] : ["dataMin - 5", "dataMax + 5"]}
+                                    tickFormatter={measurement.unit === "bool" ? (value) => value === 1 ? "ON" : "OFF" : undefined}
+                                  />
                                   <Tooltip
-                                    labelFormatter={(label) => `Time: ${label}`}
+                                    labelFormatter={(label) => (
+                                      <span style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
+                                        Time: {label}
+                                      </span>
+                                    )}
                                     formatter={(value: any) => [
-                                      `${value} ${measurement.unit}`,
+                                      measurement.unit === "bool" 
+                                        ? (value === 1 ? "ON" : "OFF")
+                                        : `${value} ${measurement.unit}`,
                                       measurementKey.replace(/_/g, " "),
                                     ]}
+                                    contentStyle={{
+                                      backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+                                      border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`
+                                    }}
                                   />
                                   <Line
                                     type="monotone"
