@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useEffect, Suspense, lazy } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -21,10 +21,12 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Factory, Power, CheckCircle, Clock, Filter, Loader2 } from "lucide-react"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useTelemetry } from "@/hooks/useTelemetry"
 import { useTheme } from "next-themes"
+import { Area, Equipment, Measurement, TelemetryData } from "@/types/telemetry"
+
+const TelemetryChart = lazy(() => import("@/components/TelemetryChart"))
 
 const getStatusColor = (isActive: boolean) => {
   return isActive ? "text-green-500" : "text-gray-400"
@@ -41,54 +43,29 @@ const getStatusIcon = (isActive: boolean) => {
   return isActive ? CheckCircle : Power
 }
 
-const calculateActiveEquipment = (data: any) => {
-  let totalEquipment = 0;
-  let activeEquipment = 0;
+const calculateActiveEquipment = (data: TelemetryData) => {
+  let totalEquipment = 0
+  let activeEquipment = 0
 
-  Object.values(data).forEach((area: any) => {
-    Object.values(area.equipment).forEach((equip: any) => {
-      totalEquipment++;
-      // TODO: Verificar se o equipamento está ativo
-      activeEquipment++;
-    });
-  });
+  Object.values(data).forEach((area: Area) => {
+    Object.values(area.equipment).forEach((equip: Equipment) => {
+      totalEquipment++
+      activeEquipment++
+    })
+  })
 
-  return { totalEquipment, activeEquipment };
+  return { totalEquipment, activeEquipment }
 }
 
-const chartColors = {
-  temperature: "#ef4444",
-  pressure: "#3b82f6",
-  speed: "#10b981",
-  frequency: "#8b5cf6",
-  power: "#f59e0b",
-  level: "#06b6d4",
-  flow: "#84cc16",
-  weight: "#f97316",
-}
+function formatDateTime(date: Date) {
+  const day = date.getDate().toString().padStart(2, '0')
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const year = date.getFullYear()
+  const hours = date.getHours().toString().padStart(2, '0')
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+  const seconds = date.getSeconds().toString().padStart(2, '0')
 
-function getChartColor(measurementKey: string) {
-  if (measurementKey.includes("temperatura") || measurementKey.includes("temperature")) return chartColors.temperature
-  if (measurementKey.includes("pressure") || measurementKey.includes("pressao")) return chartColors.pressure
-  if (measurementKey.includes("speed") || measurementKey.includes("velocidade")) return chartColors.speed
-  if (measurementKey.includes("frequencia") || measurementKey.includes("frequency")) return chartColors.frequency
-  if (measurementKey.includes("power") || measurementKey.includes("potencia")) return chartColors.power
-  if (measurementKey.includes("level") || measurementKey.includes("nivel")) return chartColors.level
-  if (measurementKey.includes("flow") || measurementKey.includes("fluxo")) return chartColors.flow
-  if (measurementKey.includes("peso") || measurementKey.includes("weight")) return chartColors.weight
-  return "#6b7280"
-}
-
-function formatDateTime(timestamp: string): string {
-  const date = new Date(timestamp);
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const seconds = date.getSeconds().toString().padStart(2, '0');
-
-  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`
 }
 
 export default function TelemetryDashboard() {
@@ -98,7 +75,6 @@ export default function TelemetryDashboard() {
   const { data, isLoading, error } = useTelemetry(timeRange)
   const { theme } = useTheme()
 
-  // Efeito para definir o índice inicial quando os dados forem carregados
   useEffect(() => {
     if (data?.data && Object.keys(data.data).length > 0) {
       setSelectedIndex(Object.keys(data.data)[0])
@@ -108,7 +84,6 @@ export default function TelemetryDashboard() {
   const handleAreaChange = (newIndex: string) => {
     setIsChangingArea(true)
     setSelectedIndex(newIndex)
-    // Simular um pequeno delay para mostrar o loading
     setTimeout(() => {
       setIsChangingArea(false)
     }, 500)
@@ -130,9 +105,9 @@ export default function TelemetryDashboard() {
     )
   }
 
-  const telemetryData = data.data;
-  const lastUpdate = data.lastUpdate;
-  const { totalEquipment, activeEquipment } = calculateActiveEquipment(telemetryData);
+  const telemetryData = data.data
+  const lastUpdate = data.lastUpdate
+  const { totalEquipment, activeEquipment } = calculateActiveEquipment(telemetryData)
 
   const filteredData = telemetryData[selectedIndex] ? { [selectedIndex]: telemetryData[selectedIndex] } : {}
 
@@ -184,7 +159,7 @@ export default function TelemetryDashboard() {
               <div className="flex items-center justify-between text-sm">
                 <span>Last Update</span>
                 <span className="text-muted-foreground">
-                  {formatDateTime(lastUpdate)}
+                  {formatDateTime(new Date(lastUpdate))}
                 </span>
               </div>
             </SidebarGroupContent>
@@ -293,100 +268,13 @@ export default function TelemetryDashboard() {
                               </div>
                             </div>
 
-                            <div className="h-32">
-                              <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={measurement.data}>
-                                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                                  <XAxis 
-                                    dataKey="timestamp" 
-                                    tick={{ 
-                                      fontSize: 10,
-                                      fill: theme === 'dark' ? '#fff' : '#000'
-                                    }} 
-                                    interval="preserveStartEnd"
-                                    tickFormatter={(value) => {
-                                      const date = new Date(value);
-                                      // Mostra apenas a hora se for o mesmo dia
-                                      const today = new Date();
-                                      const isToday = date.toDateString() === today.toDateString();
-                                      
-                                      if (isToday) {
-                                        return date.toLocaleTimeString('pt-BR', { 
-                                          hour: '2-digit', 
-                                          minute: '2-digit',
-                                          hour12: false 
-                                        });
-                                      }
-                                      
-                                      // Se não for hoje, mostra a data completa
-                                      return date.toLocaleDateString('pt-BR', {
-                                        day: '2-digit',
-                                        month: '2-digit',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        hour12: false
-                                      });
-                                    }}
-                                  />
-                                  <YAxis 
-                                    tick={{ 
-                                      fontSize: 10,
-                                      fill: theme === 'dark' ? '#fff' : '#000'
-                                    }} 
-                                    domain={measurement.unit === "bool" ? [0, 1] : ["dataMin - 5", "dataMax + 5"]}
-                                    tickFormatter={(value) => {
-                                      // Formata o valor com 2 casas decimais
-                                      return measurement.unit === "bool" 
-                                        ? (value === 1 ? "ON" : "OFF")
-                                        : value.toFixed(2);
-                                    }}
-                                  />
-                                  <Tooltip
-                                    labelFormatter={(label) => {
-                                      const date = new Date(label);
-                                      return (
-                                        <span style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
-                                          {date.toLocaleDateString('pt-BR', {
-                                            day: '2-digit',
-                                            month: '2-digit',
-                                            year: 'numeric'
-                                          })} {date.toLocaleTimeString('pt-BR', { 
-                                            hour: '2-digit', 
-                                            minute: '2-digit',
-                                            hour12: false 
-                                          })}
-                                        </span>
-                                      );
-                                    }}
-                                    formatter={(value: any) => [
-                                      measurement.unit === "bool" 
-                                        ? (value === 1 ? "ON" : "OFF")
-                                        : `${value.toFixed(2)} ${measurement.unit}`,
-                                      measurementKey.replace(/_/g, " "),
-                                    ]}
-                                    contentStyle={{
-                                      backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
-                                      border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
-                                      padding: '4px 8px',
-                                      fontSize: '12px',
-                                      borderRadius: '4px'
-                                    }}
-                                    wrapperStyle={{
-                                      outline: 'none'
-                                    }}
-                                  />
-                                  <Line
-                                    type="monotone"
-                                    dataKey="value"
-                                    stroke={getChartColor(measurementKey)}
-                                    strokeWidth={2}
-                                    dot={false}
-                                    activeDot={{ r: 4 }}
-                                    animationDuration={300}
-                                  />
-                                </LineChart>
-                              </ResponsiveContainer>
-                            </div>
+                            <Suspense fallback={<div className="h-32 animate-pulse bg-muted rounded" />}>
+                              <TelemetryChart
+                                data={measurement.data}
+                                measurementKey={measurementKey}
+                                unit={measurement.unit}
+                              />
+                            </Suspense>
                           </div>
                         ))}
                     </CardContent>
