@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import * as fs from 'fs';
 import * as path from 'path';
 import csv from 'csv-parser';
+import { gerarDadosTelemetria } from '@/lib/telemetriaGenerator';
+import { TelemetryData } from '@/types/telemetry';
 
 type TimeSeriesData = {
   timestamp: string;
@@ -27,10 +29,6 @@ type IndexStructure = {
   equipment: {
     [resource: string]: Equipment;
   };
-};
-
-type TelemetryData = {
-  [index: string]: IndexStructure;
 };
 
 type CSVRow = {
@@ -100,13 +98,10 @@ async function readCSVWithCache(): Promise<CSVRow[]> {
 
 // Função para normalizar o formato do timestamp
 function normalizeTimestamp(timestamp: string): Date {
-  // Converte o formato yyyy-mm-dd hh:mm:ss para um objeto Date
   const [datePart, timePart] = timestamp.split(' ');
   const [year, month, day] = datePart.split('-').map(Number);
   const [hours, minutes, seconds] = timePart.split(':').map(Number);
   
-  // Cria uma nova data com os componentes extraídos
-  // Note: month - 1 porque em JavaScript os meses começam em 0
   const date = new Date(year, month - 1, day, hours, minutes, seconds);
   
   if (isNaN(date.getTime())) {
@@ -118,11 +113,10 @@ function normalizeTimestamp(timestamp: string): Date {
 }
 
 // Função para filtrar dados por período
-function filterDataByTimeRange(data: CSVRow[], timeRange: string): CSVRow[] {
+function filterDataByTimeRange(data: any[], timeRange: string): any[] {
   const now = new Date();
   let startTime: Date;
 
-  // Extrai o número e a unidade do timeRange (ex: "1h" -> { value: 1, unit: "h" })
   const match = timeRange.match(/^(\d+)([hdm])$/);
   
   if (!match) {
@@ -132,18 +126,16 @@ function filterDataByTimeRange(data: CSVRow[], timeRange: string): CSVRow[] {
     const [, value, unit] = match;
     const numericValue = parseInt(value, 10);
 
-    // Calcula o tempo em milissegundos baseado na unidade
     const milliseconds = numericValue * (
-      unit === 'h' ? 60 * 60 * 1000 : // horas
-      unit === 'd' ? 24 * 60 * 60 * 1000 : // dias
-      60 * 1000 // minutos
+      unit === 'h' ? 60 * 60 * 1000 :
+      unit === 'd' ? 24 * 60 * 60 * 1000 :
+      60 * 1000
     );
 
     startTime = new Date(now.getTime() - milliseconds);
   }
 
-  // Filtra os dados usando um único loop para melhor performance
-  const filteredData = data.filter(row => {
+  return data.filter(row => {
     try {
       const rowDate = normalizeTimestamp(row.timestamp);
       return rowDate >= startTime && rowDate <= now;
@@ -151,10 +143,7 @@ function filterDataByTimeRange(data: CSVRow[], timeRange: string): CSVRow[] {
       console.error('Erro ao processar timestamp:', row.timestamp);
       return false;
     }
-  });
-
-  // Ordena os dados filtrados
-  return filteredData.sort((a, b) => {
+  }).sort((a, b) => {
     const dateA = normalizeTimestamp(a.timestamp);
     const dateB = normalizeTimestamp(b.timestamp);
     return dateA.getTime() - dateB.getTime();
@@ -166,11 +155,11 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const timeRange = searchParams.get('timeRange') || '12h';
 
-    // Lê os dados do CSV (com cache)
-    const data = await readCSVWithCache();
+    // Gera os dados simulados
+    const rawData = gerarDadosTelemetria();
 
     // Filtra os dados pelo período selecionado
-    const filteredData = filterDataByTimeRange(data, timeRange);
+    const filteredData = filterDataByTimeRange(rawData, timeRange);
 
     const telemetryData: TelemetryData = {};
 
@@ -181,7 +170,7 @@ export async function GET(request: Request) {
     }
 
     // Agrupa os dados por índice, equipamento e medição
-    const groupedData: { [key: string]: { [key: string]: { [key: string]: TimeSeriesData[] } } } = {};
+    const groupedData: { [key: string]: { [key: string]: { [key: string]: any[] } } } = {};
 
     filteredData.forEach((row) => {
       const index = row.index;
@@ -249,9 +238,9 @@ export async function GET(request: Request) {
 
     return NextResponse.json(telemetryData);
   } catch (error) {
-    console.error('Erro ao processar arquivo de telemetria:', error);
+    console.error('Erro ao processar dados de telemetria:', error);
     return NextResponse.json(
-      { error: 'Erro ao processar arquivo de telemetria', details: error instanceof Error ? error.message : String(error) },
+      { error: 'Erro ao processar dados de telemetria', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
@@ -302,6 +291,19 @@ export async function POST(request: Request) {
     console.error('Erro ao atualizar arquivo de telemetria:', error);
     return NextResponse.json(
       { error: 'Erro ao atualizar arquivo de telemetria' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GETGerarDadosTelemetria() {
+  try {
+    const dados = gerarDadosTelemetria();
+    return NextResponse.json(dados);
+  } catch (error) {
+    console.error('Erro ao gerar dados de telemetria:', error);
+    return NextResponse.json(
+      { error: 'Erro ao gerar dados de telemetria' },
       { status: 500 }
     );
   }

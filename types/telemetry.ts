@@ -1,33 +1,34 @@
 export type TimeSeriesData = {
-  timestamp: string
-  value: number
-}
+  timestamp: string;
+  time: string;
+  value: number;
+};
 
 export type Measurement = {
-  value: number
-  unit: string
-  data: TimeSeriesData[]
-}
+  value: number;
+  unit: string;
+  data: TimeSeriesData[];
+};
 
 export type Equipment = {
-  name: string
+  name: string;
   measurement: {
-    [measurementName: string]: Measurement
-  }
-}
+    [measurementName: string]: Measurement;
+  };
+};
 
 export type Area = {
-  name: string
+  name: string;
   equipment: {
-    [resource: string]: Equipment
-  }
-}
+    [resource: string]: Equipment;
+  };
+};
 
 export type TelemetryData = {
-  [index: string]: Area
-}
+  [index: string]: Area;
+};
 
 export type TelemetryResponse = {
-  data: TelemetryData
-  lastUpdate: string
-} 
+  data: TelemetryData;
+  lastUpdate: string;
+}; 
