@@ -2,297 +2,297 @@ import { addDays, subDays, format, addMinutes } from 'date-fns';
 
 // Estrutura de dados
 const estrutura = {
-  "CEM": {
-    "NOME": "Cobertura",
-    "Reator 4": [
-      ["Status agitador interno", "Bool"],
-      ["Velocidade impelidor interno", "RPM"],
-      ["Status agitador externo", "Bool"],
-      ["Velocidade impelidor externo", "RPM"],
-      ["Peso", "Kg"],
-      ["Temperatura", "ºC"]
+  "SEC-01": {
+    "NOME": "Section Alpha",
+    "Asset-017": [
+      ["Status Flag 02", "Bool"],
+      ["Speed Metric 05", "RPM"],
+      ["Status Flag 01", "Bool"],
+      ["Speed Metric 04", "RPM"],
+      ["Load Metric Bulk", "Kg"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Reator 5": [
-      ["Status agitador interno", "Bool"],
-      ["Velocidade impelidor interno", "RPM"],
-      ["Status agitador externo", "Bool"],
-      ["Velocidade impelidor externo", "RPM"],
-      ["Peso", "Kg"],
-      ["Temperatura", "ºC"]
+    "Asset-018": [
+      ["Status Flag 02", "Bool"],
+      ["Speed Metric 05", "RPM"],
+      ["Status Flag 01", "Bool"],
+      ["Speed Metric 04", "RPM"],
+      ["Load Metric Bulk", "Kg"],
+      ["Thermal Metric 01", "ºC"]
     ]
   },
-  "PSV": {
-    "NOME": "Pastas Massas e Variegatos",
-    "Misturador 1": [
-      ["Frequência bomba", "Hz"],
-      ["Frequência misturador", "Hz"],
-      ["Frequência samba", "Hz"],
-      ["Peso misturador", "Kg"],
-      ["Temperatura", "ºC"],
-      ["Setpoint Temperatura", "ºC"]
+  "SEC-02": {
+    "NOME": "Section Beta",
+    "Asset-001": [
+      ["Frequency Metric 04", "Hz"],
+      ["Frequency Metric 08", "Hz"],
+      ["Frequency Metric 09", "Hz"],
+      ["Load Metric Blend", "Kg"],
+      ["Thermal Metric 01", "ºC"],
+      ["Setpoint Metric 01", "ºC"]
     ],
-    "Misturador 2": [
-      ["Frequência bomba", "Hz"],
-      ["Frequência misturador", "Hz"],
-      ["Frequência samba", "Hz"],
-      ["Peso misturador", "Kg"],
-      ["Temperatura", "ºC"],
-      ["Setpoint Temperatura", "ºC"]
+    "Asset-002": [
+      ["Frequency Metric 04", "Hz"],
+      ["Frequency Metric 08", "Hz"],
+      ["Frequency Metric 09", "Hz"],
+      ["Load Metric Blend", "Kg"],
+      ["Thermal Metric 01", "ºC"],
+      ["Setpoint Metric 01", "ºC"]
     ],
-    "Misturador 3": [
-      ["Frequência bomba", "Hz"],
-      ["Frequência misturador", "Hz"],
-      ["Frequência samba", "Hz"],
-      ["Peso misturador", "Kg"],
-      ["Temperatura", "ºC"],
-      ["Setpoint Temperatura", "ºC"]
+    "Asset-003": [
+      ["Frequency Metric 04", "Hz"],
+      ["Frequency Metric 08", "Hz"],
+      ["Frequency Metric 09", "Hz"],
+      ["Load Metric Blend", "Kg"],
+      ["Thermal Metric 01", "ºC"],
+      ["Setpoint Metric 01", "ºC"]
     ],
-    "Misturador 4": [
-      ["Frequência bomba", "Hz"],
-      ["Frequência misturador", "Hz"],
-      ["Frequência samba", "Hz"],
-      ["Peso misturador", "Kg"],
-      ["Temperatura", "ºC"],
-      ["Setpoint Temperatura", "ºC"]
+    "Asset-004": [
+      ["Frequency Metric 04", "Hz"],
+      ["Frequency Metric 08", "Hz"],
+      ["Frequency Metric 09", "Hz"],
+      ["Load Metric Blend", "Kg"],
+      ["Thermal Metric 01", "ºC"],
+      ["Setpoint Metric 01", "ºC"]
     ],
-    "Moinho 1": [
-      ["Corrente do moinho", "A"],
-      ["Potência do moinho", "kW"],
-      ["Pressão interna", "Bar"],
-      ["Rotação", "RPM"],
-      ["Temp. Entrada", "ºC"],
-      ["Temp. Saida", "ºC"],
-      ["Temp. Saida Trocador", "ºC"],
-      ["Frequência bomba alimentação", "Hz"],
-      ["Frequência bomba descarga", "Hz"]
+    "Asset-005": [
+      ["Current Metric 04", "A"],
+      ["Power Metric 01", "kW"],
+      ["Pressure Metric 02", "Bar"],
+      ["Rotation Metric 01", "RPM"],
+      ["Thermal Metric Mixer Inlet", "ºC"],
+      ["Thermal Metric Mixer Outlet", "ºC"],
+      ["Thermal Metric Transfer Outlet", "ºC"],
+      ["Frequency Metric 05", "Hz"],
+      ["Frequency Metric 06", "Hz"]
     ],
-    "Moinho 2": [
-      ["Corrente do moinho", "A"],
-      ["Potência do moinho", "kW"],
-      ["Pressão interna", "Bar"],
-      ["Rotação", "RPM"],
-      ["Temp. Entrada", "ºC"],
-      ["Temp. Saida", "ºC"],
-      ["Temp. Saida Trocador", "ºC"],
-      ["Frequência bomba alimentação", "Hz"],
-      ["Frequência bomba descarga", "Hz"]
+    "Asset-006": [
+      ["Current Metric 04", "A"],
+      ["Power Metric 01", "kW"],
+      ["Pressure Metric 02", "Bar"],
+      ["Rotation Metric 01", "RPM"],
+      ["Thermal Metric Mixer Inlet", "ºC"],
+      ["Thermal Metric Mixer Outlet", "ºC"],
+      ["Thermal Metric Transfer Outlet", "ºC"],
+      ["Frequency Metric 05", "Hz"],
+      ["Frequency Metric 06", "Hz"]
     ],
-    "Moinho 3": [
-      ["Corrente do moinho", "A"],
-      ["Potência do moinho", "kW"],
-      ["Pressão interna", "Bar"],
-      ["Rotação", "RPM"],
-      ["Temp. Entrada", "ºC"],
-      ["Temp. Saida", "ºC"],
-      ["Temp. Saida Trocador", "ºC"],
-      ["Frequência bomba alimentação", "Hz"],
-      ["Frequência bomba descarga", "Hz"]
+    "Asset-007": [
+      ["Current Metric 04", "A"],
+      ["Power Metric 01", "kW"],
+      ["Pressure Metric 02", "Bar"],
+      ["Rotation Metric 01", "RPM"],
+      ["Thermal Metric Mixer Inlet", "ºC"],
+      ["Thermal Metric Mixer Outlet", "ºC"],
+      ["Thermal Metric Transfer Outlet", "ºC"],
+      ["Frequency Metric 05", "Hz"],
+      ["Frequency Metric 06", "Hz"]
     ],
-    "Moinho 4": [
-      ["Corrente do moinho", "A"],
-      ["Potência do moinho", "kW"],
-      ["Pressão interna", "Bar"],
-      ["Rotação", "RPM"],
-      ["Temp. Entrada", "ºC"],
-      ["Temp. Saida", "ºC"],
-      ["Temp. Saida Trocador", "ºC"],
-      ["Frequência bomba alimentação", "Hz"],
-      ["Frequência bomba descarga", "Hz"]
+    "Asset-008": [
+      ["Current Metric 04", "A"],
+      ["Power Metric 01", "kW"],
+      ["Pressure Metric 02", "Bar"],
+      ["Rotation Metric 01", "RPM"],
+      ["Thermal Metric Mixer Inlet", "ºC"],
+      ["Thermal Metric Mixer Outlet", "ºC"],
+      ["Thermal Metric Transfer Outlet", "ºC"],
+      ["Frequency Metric 05", "Hz"],
+      ["Frequency Metric 06", "Hz"]
     ],
-    "Moinho 5": [
-      ["Corrente do moinho", "A"],
-      ["Potência do moinho", "kW"],
-      ["Pressão interna", "Bar"],
-      ["Rotação", "RPM"],
-      ["Temp. Entrada", "ºC"],
-      ["Temp. Saida", "ºC"],
-      ["Temp. Saida Trocador", "ºC"],
-      ["Frequência bomba alimentação", "Hz"],
-      ["Frequência bomba descarga", "Hz"]
+    "Asset-009": [
+      ["Current Metric 04", "A"],
+      ["Power Metric 01", "kW"],
+      ["Pressure Metric 02", "Bar"],
+      ["Rotation Metric 01", "RPM"],
+      ["Thermal Metric Mixer Inlet", "ºC"],
+      ["Thermal Metric Mixer Outlet", "ºC"],
+      ["Thermal Metric Transfer Outlet", "ºC"],
+      ["Frequency Metric 05", "Hz"],
+      ["Frequency Metric 06", "Hz"]
     ],
-    "Moinho 6": [
-      ["Corrente do moinho", "A"],
-      ["Potência do moinho", "kW"],
-      ["Pressão interna", "Bar"],
-      ["Rotação", "RPM"],
-      ["Temp. Entrada", "ºC"],
-      ["Temp. Saida", "ºC"],
-      ["Temp. Saida Trocador", "ºC"],
-      ["Frequência bomba alimentação", "Hz"],
-      ["Frequência bomba descarga", "Hz"]
+    "Asset-010": [
+      ["Current Metric 04", "A"],
+      ["Power Metric 01", "kW"],
+      ["Pressure Metric 02", "Bar"],
+      ["Rotation Metric 01", "RPM"],
+      ["Thermal Metric Mixer Inlet", "ºC"],
+      ["Thermal Metric Mixer Outlet", "ºC"],
+      ["Thermal Metric Transfer Outlet", "ºC"],
+      ["Frequency Metric 05", "Hz"],
+      ["Frequency Metric 06", "Hz"]
     ],
-    "Reator 1": [
-      ["Setpoint Temperatura", "ºC"],
-      ["Corrente agitador 1", "A"],
-      ["Corrente agitador 2", "A"],
-      ["Frequência agitador 1", "Hz"],
-      ["Frequência agitador 2", "Hz"],
-      ["Temperatura", "ºC"]
+    "Asset-014": [
+      ["Setpoint Metric 01", "ºC"],
+      ["Current Metric 02", "A"],
+      ["Current Metric 03", "A"],
+      ["Frequency Metric 02", "Hz"],
+      ["Frequency Metric 03", "Hz"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Reator 2": [
-      ["Setpoint Temperatura", "ºC"],
-      ["Corrente agitador 1", "A"],
-      ["Corrente agitador 2", "A"],
-      ["Frequência agitador 1", "Hz"],
-      ["Frequência agitador 2", "Hz"],
-      ["Temperatura", "ºC"]
+    "Asset-015": [
+      ["Setpoint Metric 01", "ºC"],
+      ["Current Metric 02", "A"],
+      ["Current Metric 03", "A"],
+      ["Frequency Metric 02", "Hz"],
+      ["Frequency Metric 03", "Hz"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Reator 3": [
-      ["Setpoint Temperatura", "ºC"],
-      ["Corrente agitador 1", "A"],
-      ["Corrente agitador 2", "A"],
-      ["Frequência agitador 1", "Hz"],
-      ["Frequência agitador 2", "Hz"],
-      ["Temperatura", "ºC"]
+    "Asset-016": [
+      ["Setpoint Metric 01", "ºC"],
+      ["Current Metric 02", "A"],
+      ["Current Metric 03", "A"],
+      ["Frequency Metric 02", "Hz"],
+      ["Frequency Metric 03", "Hz"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Reator 4": [
-      ["Setpoint Temperatura", "ºC"],
-      ["Corrente agitador 1", "A"],
-      ["Corrente agitador 2", "A"],
-      ["Frequência agitador 1", "Hz"],
-      ["Frequência agitador 2", "Hz"],
-      ["Temperatura", "ºC"]
+    "Asset-017": [
+      ["Setpoint Metric 01", "ºC"],
+      ["Current Metric 02", "A"],
+      ["Current Metric 03", "A"],
+      ["Frequency Metric 02", "Hz"],
+      ["Frequency Metric 03", "Hz"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Reator 5": [
-      ["Setpoint Temperatura", "ºC"],
-      ["Corrente agitador 1", "A"],
-      ["Corrente agitador 2", "A"],
-      ["Frequência agitador 1", "Hz"],
-      ["Frequência agitador 2", "Hz"],
-      ["Temperatura", "ºC"]
+    "Asset-018": [
+      ["Setpoint Metric 01", "ºC"],
+      ["Current Metric 02", "A"],
+      ["Current Metric 03", "A"],
+      ["Frequency Metric 02", "Hz"],
+      ["Frequency Metric 03", "Hz"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Reator 6": [
-      ["Setpoint Temperatura", "ºC"],
-      ["Corrente agitador 1", "A"],
-      ["Corrente agitador 2", "A"],
-      ["Frequência agitador 1", "Hz"],
-      ["Frequência agitador 2", "Hz"],
-      ["Temperatura", "ºC"]
+    "Asset-019": [
+      ["Setpoint Metric 01", "ºC"],
+      ["Current Metric 02", "A"],
+      ["Current Metric 03", "A"],
+      ["Frequency Metric 02", "Hz"],
+      ["Frequency Metric 03", "Hz"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Tanque Processo 1": [
-      ["Setpoint Temperatura", "ºC"],
-      ["Corrente agitador", "A"],
-      ["Frequência agitador", "Hz"],
-      ["Temperatura", "ºC"]
+    "Asset-034": [
+      ["Setpoint Metric 01", "ºC"],
+      ["Current Metric 01", "A"],
+      ["Frequency Metric 01", "Hz"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Tanque Processo 2": [
-      ["Setpoint Temperatura", "ºC"],
-      ["Corrente agitador", "A"],
-      ["Frequência agitador", "Hz"],
-      ["Temperatura", "ºC"]
+    "Asset-035": [
+      ["Setpoint Metric 01", "ºC"],
+      ["Current Metric 01", "A"],
+      ["Frequency Metric 01", "Hz"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Tanque Processo 3": [
-      ["Setpoint Temperatura", "ºC"],
-      ["Corrente agitador", "A"],
-      ["Frequência agitador", "Hz"],
-      ["Temperatura", "ºC"]
+    "Asset-036": [
+      ["Setpoint Metric 01", "ºC"],
+      ["Current Metric 01", "A"],
+      ["Frequency Metric 01", "Hz"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Tanque Finalização 4": [
-      ["Setpoint Temperatura", "ºC"],
-      ["Corrente agitador", "A"],
-      ["Frequência agitador", "Hz"],
-      ["Temperatura", "ºC"]
+    "Asset-032": [
+      ["Setpoint Metric 01", "ºC"],
+      ["Current Metric 01", "A"],
+      ["Frequency Metric 01", "Hz"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Tanque Finalização 5": [
-      ["Setpoint Temperatura", "ºC"],
-      ["Corrente agitador", "A"],
-      ["Frequência agitador", "Hz"],
-      ["Temperatura", "ºC"]
+    "Asset-033": [
+      ["Setpoint Metric 01", "ºC"],
+      ["Current Metric 01", "A"],
+      ["Frequency Metric 01", "Hz"],
+      ["Thermal Metric 01", "ºC"]
     ]
   },
-  "DET": {
-    "NOME": "Destilaria",
-    "Reator B": [
-      ["Velocidade Agitador", "RPM"],
-      ["Pressão Interna", "Bar"],
-      ["Temperatura", "ºC"]
+  "SEC-03": {
+    "NOME": "Section Gamma",
+    "Asset-020": [
+      ["Speed Metric 01", "RPM"],
+      ["Pressure Metric 01", "Bar"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Reator H": [
-      ["Velocidade Agitador", "RPM"],
-      ["Pressão Interna", "Bar"],
-      ["Temperatura", "ºC"]
+    "Asset-021": [
+      ["Speed Metric 01", "RPM"],
+      ["Pressure Metric 01", "Bar"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Reator K": [
-      ["Velocidade Agitador", "RPM"],
-      ["Pressão Interna", "Bar"],
-      ["Temperatura", "ºC"]
+    "Asset-022": [
+      ["Speed Metric 01", "RPM"],
+      ["Pressure Metric 01", "Bar"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Reator M": [
-      ["Velocidade Agitador", "RPM"],
-      ["Pressão Interna", "Bar"],
-      ["Temperatura", "ºC"]
+    "Asset-023": [
+      ["Speed Metric 01", "RPM"],
+      ["Pressure Metric 01", "Bar"],
+      ["Thermal Metric 01", "ºC"]
     ],
-    "Reator P": [
-      ["Velocidade Agitador", "RPM"],
-      ["Pressão Interna", "Bar"],
-      ["Temperatura", "ºC"]
+    "Asset-024": [
+      ["Speed Metric 01", "RPM"],
+      ["Pressure Metric 01", "Bar"],
+      ["Thermal Metric 01", "ºC"]
     ]
   },
-  "SPR": {
-    "NOME": "Spray",
-    "Spray 2": [
-      ["Temperatura entrada", "ºC"],
-      ["Temperatura saida", "ºC"],
-      ["Vazão bomba alimentação", "RPM"],
-      ["Velocidade atomizador", "RPM"],
-      ["Velocidade do exaustor", "RPM"]
+  "SEC-04": {
+    "NOME": "Section Delta",
+    "Asset-025": [
+      ["Thermal Metric Inlet", "ºC"],
+      ["Thermal Metric Outlet", "ºC"],
+      ["Flow Metric 01", "RPM"],
+      ["Speed Metric 02", "RPM"],
+      ["Speed Metric 03", "RPM"]
     ],
-    "Spray 4": [
-      ["Temperatura entrada", "ºC"],
-      ["Temperatura saida", "ºC"],
-      ["Vazão bomba alimentação", "RPM"],
-      ["Velocidade atomizador", "RPM"],
-      ["Velocidade do exaustor", "RPM"]
+    "Asset-026": [
+      ["Thermal Metric Inlet", "ºC"],
+      ["Thermal Metric Outlet", "ºC"],
+      ["Flow Metric 01", "RPM"],
+      ["Speed Metric 02", "RPM"],
+      ["Speed Metric 03", "RPM"]
     ],
-    "Spray 5": [
-      ["Temperatura entrada", "ºC"],
-      ["Temperatura saida", "ºC"],
-      ["Vazão bomba alimentação", "RPM"],
-      ["Velocidade atomizador", "RPM"],
-      ["Velocidade do exaustor", "RPM"]
+    "Asset-027": [
+      ["Thermal Metric Inlet", "ºC"],
+      ["Thermal Metric Outlet", "ºC"],
+      ["Flow Metric 01", "RPM"],
+      ["Speed Metric 02", "RPM"],
+      ["Speed Metric 03", "RPM"]
     ],
-    "Spray 6": [
-      ["Temperatura entrada", "ºC"],
-      ["Temperatura saida", "ºC"],
-      ["Vazão bomba alimentação", "RPM"],
-      ["Velocidade atomizador", "RPM"],
-      ["Velocidade do exaustor", "RPM"]
+    "Asset-028": [
+      ["Thermal Metric Inlet", "ºC"],
+      ["Thermal Metric Outlet", "ºC"],
+      ["Flow Metric 01", "RPM"],
+      ["Speed Metric 02", "RPM"],
+      ["Speed Metric 03", "RPM"]
     ],
-    "Spray 7": [
-      ["Temperatura entrada", "ºC"],
-      ["Temperatura saida", "ºC"],
-      ["Vazão bomba alimentação", "RPM"],
-      ["Velocidade atomizador", "RPM"],
-      ["Velocidade do exaustor", "RPM"]
+    "Asset-029": [
+      ["Thermal Metric Inlet", "ºC"],
+      ["Thermal Metric Outlet", "ºC"],
+      ["Flow Metric 01", "RPM"],
+      ["Speed Metric 02", "RPM"],
+      ["Speed Metric 03", "RPM"]
     ],
-    "Spray 8": [
-      ["Temperatura entrada", "ºC"],
-      ["Temperatura saida", "ºC"],
-      ["Vazão bomba alimentação", "RPM"],
-      ["Velocidade atomizador", "RPM"],
-      ["Velocidade do exaustor", "RPM"]
+    "Asset-030": [
+      ["Thermal Metric Inlet", "ºC"],
+      ["Thermal Metric Outlet", "ºC"],
+      ["Flow Metric 01", "RPM"],
+      ["Speed Metric 02", "RPM"],
+      ["Speed Metric 03", "RPM"]
     ],
-    "Spray 9": [
-      ["Temperatura entrada", "ºC"],
-      ["Temperatura saida", "ºC"],
-      ["Vazão bomba alimentação", "RPM"],
-      ["Velocidade atomizador", "RPM"],
-      ["Velocidade do exaustor", "RPM"]
+    "Asset-031": [
+      ["Thermal Metric Inlet", "ºC"],
+      ["Thermal Metric Outlet", "ºC"],
+      ["Flow Metric 01", "RPM"],
+      ["Speed Metric 02", "RPM"],
+      ["Speed Metric 03", "RPM"]
     ]
   },
-  "FLO": {
-    "NOME": "Flocos",
-    "Queimador 1": [
-      ["Frequência exaustor", "Hz"],
-      ["Temperatura queimador", "ºC"]
+  "SEC-05": {
+    "NOME": "Section Epsilon",
+    "Asset-011": [
+      ["Frequency Metric 07", "Hz"],
+      ["Thermal Metric High", "ºC"]
     ],
-    "Queimador 2": [
-      ["Frequência exaustor", "Hz"],
-      ["Temperatura queimador", "ºC"]
+    "Asset-012": [
+      ["Frequency Metric 07", "Hz"],
+      ["Thermal Metric High", "ºC"]
     ],
-    "Queimador 4": [
-      ["Frequência exaustor", "Hz"],
-      ["Temperatura queimador", "ºC"]
+    "Asset-013": [
+      ["Frequency Metric 07", "Hz"],
+      ["Thermal Metric High", "ºC"]
     ]
   }
 };
@@ -310,14 +310,14 @@ const faixas: Record<string, [number, number]> = {
 };
 
 const faixasEspecificas: Record<string, [number, number]> = {
-  "Temperatura queimador": [400, 900],
-  "Temperatura entrada": [60, 90],
-  "Temperatura saida": [70, 120],
-  "Temp. Entrada": [60, 90],
-  "Temp. Saida": [70, 120],
-  "Temp. Saida Trocador": [60, 100],
-  "Peso": [100, 1000],
-  "Peso misturador": [100, 1000],
+  "Thermal Metric High": [400, 900],
+  "Thermal Metric Inlet": [60, 90],
+  "Thermal Metric Outlet": [70, 120],
+  "Thermal Metric Mixer Inlet": [60, 90],
+  "Thermal Metric Mixer Outlet": [70, 120],
+  "Thermal Metric Transfer Outlet": [60, 100],
+  "Load Metric Bulk": [100, 1000],
+  "Load Metric Blend": [100, 1000],
 };
 
 // Função para obter faixa do sensor

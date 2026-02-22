@@ -55,6 +55,12 @@ O projeto utiliza Tailwind CSS para estilização. As configurações podem ser 
 - `app/globals.css` - Estilos globais
 - `components.json` - Configurações dos componentes
 
+## 🔒 Anonimização de Dados
+
+- Todos os identificadores de ativos, áreas e sensores presentes na geração de telemetria (`lib/telemetriaGenerator.ts`) foram substituídos por nomes genéricos (ex.: `SEC-01`, `Asset-001`, `Thermal Metric 01`).
+- A anonimização garante que nenhuma informação confidencial de equipamentos reais apareça nos commits públicos sem alterar o comportamento do gerador de dados.
+- Ao precisar mapear os códigos internos para ativos reais, utilize documentação privada fora do repositório público.
+
 ## 📁 Estrutura do Projeto
 
 ```
